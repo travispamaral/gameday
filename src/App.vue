@@ -12,6 +12,7 @@
 
 <script>
 import moment from 'moment'
+import axios from 'axios'
 
 import Game from '@/components/Game'
 import NoGame from '@/components/NoGame'
@@ -22,7 +23,8 @@ export default {
 
   data () {
     return {
-      games: require('@/assets/games.json'),
+      // games: require('@/assets/games.json'),
+      games: {},
       today: moment().format('MM/DD/YY')
     }
   },
@@ -34,13 +36,13 @@ export default {
   },
 
   created () {
-    this.checkGame()
+    axios.get('games.json').then(res => {
+      this.games = res.data
+    })
   },
 
   methods: {
-    checkGame () {
 
-    }
   }
 }
 </script>
