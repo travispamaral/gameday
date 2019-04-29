@@ -37,7 +37,7 @@ export default {
 
   created () {
     axios.get('games.json').then(res => {
-      this.games = res.data
+      this.games = res.data[0]
     })
   },
 
