@@ -5,12 +5,15 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "lambda:serve": "netlify-lambda serve functions",
+    "lambda:build": "netlify-lambda build functions",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "core-js": "^2.6.5",
     "moment": "^2.24.0",
+    "netlify-lambda": "^1.4.7",
     "register-service-worker": "^1.6.2",
     "vue": "^2.6.10"
   },
