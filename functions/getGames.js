@@ -31,9 +31,9 @@ exports.handler = (event, context, callback) => {
     .then(game => {
       if (!game) {
         callback(null, {
-          statusCode: 500,
+          statusCode: 200,
           body: JSON.stringify({
-            error: 'No Game Today'
+            message: 'No Game Today'
           })
         })
       }
