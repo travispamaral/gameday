@@ -21,7 +21,7 @@ const isGameToday = (games) => {
   if (game) {
     return game
   } else {
-    throw new Error('Nope')
+    return null
   }
 }
 
@@ -29,6 +29,14 @@ exports.handler = (event, context, callback) => {
   return axios.get(url)
     .then(res => isGameToday(res.data))
     .then(game => {
+      if (!game) {
+        callback(null, {
+          statusCode: 500,
+          body: JSON.stringify({
+            error: 'No Game Today'
+          })
+        })
+      }
       // Setup email
       const mailOptions = {
         from: `"Travis Amaral" <travispamaral@gmail.com>`,
@@ -43,21 +51,19 @@ exports.handler = (event, context, callback) => {
       // Send the email... or don't :)
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          const response = {
+          callback(null, {
             statusCode: 500,
             body: JSON.stringify({
               error: error.message
             })
-          }
-          callback(null, response)
+          })
         }
-        const response = {
+        callback(null, {
           statusCode: 200,
           body: JSON.stringify({
             message: `Email sent!`
           })
-        }
-        callback(null, response)
+        })
       })
     })
     .catch(error => ({ statusCode: 422, body: String(error) }))
