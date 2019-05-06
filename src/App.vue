@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import { format } from 'date-fns'
 import axios from 'axios'
 
 import Game from '@/components/Game'
@@ -23,9 +23,8 @@ export default {
 
   data () {
     return {
-      // games: require('@/assets/games.json'),
       games: {},
-      today: moment().format('MM/DD/YY')
+      today: format(new Date(), 'M/DD/YYYY')
     }
   },
 
