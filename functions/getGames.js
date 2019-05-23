@@ -4,28 +4,29 @@ const nodemailer = require('nodemailer')
 
 const url = 'http://gameday.netlify.com/games.json'
 const today = format(new Date(), 'M/DD/YYYY')
-const user = process.env.MAIL_USER
-const pass = process.env.MAIL_PASSWORD
-
-// Setup SMTP details
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: { user, pass }
-})
-
-// Check if game today and return game {}
-const isGameToday = (games) => {
-  const game = games[0][today]
-  if (game) {
-    return game
-  } else {
-    return null
-  }
-}
 
 exports.handler = (event, context, callback) => {
+  const { MAIL_USER, MAIL_PASSWORD } = process.env
+
+  // Setup SMTP details
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: { MAIL_USER, MAIL_PASSWORD }
+  })
+
+  // Check if game today and return game {}
+  const isGameToday = (games) => {
+    const game = games[0][today]
+
+    if (game) {
+      return game
+    } else {
+      return null
+    }
+  }
+
   return axios.get(url)
     .then(res => isGameToday(res.data))
     .then(game => {
