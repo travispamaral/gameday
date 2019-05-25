@@ -20,6 +20,8 @@ exports.handler = (event, context, callback) => {
   const isGameToday = (games) => {
     const game = games[0][today]
 
+    console.log(MAIL_USER, MAIL_PASSWORD)
+
     if (game) {
       return game
     } else {
