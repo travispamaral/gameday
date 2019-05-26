@@ -2,11 +2,13 @@ const axios = require('axios')
 const { format } = require('date-fns')
 const nodemailer = require('nodemailer')
 
-const url = 'http://gameday.netlify.com/games.json'
-const today = format(new Date(), 'M/DD/YYYY')
+exports.handler = async (event, context, callback) => {
+  const { MAIL_PASSWORD, MAIL_USER } = process.env
+  const url = 'http://gameday.netlify.com/games.json'
+  const today = format(new Date(), 'M/DD/YYYY')
 
-exports.handler = (event, context, callback) => {
-  const { MAIL_USER, MAIL_PASSWORD } = process.env
+  const pass = { statusCode: 200, body: 'Email sent!' }
+  const fail = { statusCode: 404, body: 'No game' }
 
   // Setup SMTP details
   const transporter = nodemailer.createTransport({
@@ -16,58 +18,38 @@ exports.handler = (event, context, callback) => {
     auth: { MAIL_USER, MAIL_PASSWORD }
   })
 
-  // Check if game today and return game {}
-  const isGameToday = (games) => {
-    const game = games[0][today]
-
-    console.log(MAIL_USER, MAIL_PASSWORD)
-
-    if (game) {
-      return game
-    } else {
-      return null
-    }
-  }
-
   return axios.get(url)
-    .then(res => isGameToday(res.data))
-    .then(game => {
-      if (!game) {
-        callback(null, {
-          statusCode: 200,
-          body: JSON.stringify({
-            message: 'No Game Today'
-          })
-        })
-      }
-      // Setup email
-      const mailOptions = {
-        from: `"Travis Amaral" <travispamaral@gmail.com>`,
-        to: 'travispamaral@gmail.com',
-        subject: '⚾ Gameday automation - GAME TODAY! ⚾',
-        html: `<h4>There is a game today!</h4>
-        <p><strong>${game['SUBJECT']} | ${game['START TIME']}</strong></p>
-        <p><a href="https://gameday.netlify.com">https://gameday.netlify.com</p>
-        `
-      }
+    .then(res => {
+      const game = res.data[0][today] // Get today's game if exists
 
-      // Send the email... or don't :)
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          callback(null, {
-            statusCode: 500,
-            body: JSON.stringify({
-              error: error.message
-            })
-          })
+      if (!game) {
+        console.log('no game')
+        return callback(null, fail)
+      } else {
+        console.log('game')
+        const mailOptions = {
+          from: `"Travis Amaral" <travispamaral@gmail.com>`,
+          to: 'travispamaral@gmail.com',
+          subject: '⚾ Gameday automation - GAME TODAY! ⚾',
+          html: `<h4>There is a game today!</h4>
+          <p><strong>${game['SUBJECT']} | ${game['START TIME']}</strong></p>
+          <p><a href="https://gameday.netlify.com">https://gameday.netlify.com</p>
+          `
         }
-        callback(null, {
-          statusCode: 200,
-          body: JSON.stringify({
-            message: `Email sent!`
-          })
+        // Send the email
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            return callback(null, {
+              statusCode: 500,
+              body: JSON.stringify({
+                error: error.message
+              })
+            })
+          }
+
+          return callback(null, pass)
         })
-      })
+      }
     })
-    .catch(error => ({ statusCode: 422, body: String(error) }))
+    .catch(error => callback(null, { statusCode: 400, body: JSON.stringify({ error: error.message }) }))
 }
