@@ -10,12 +10,12 @@ exports.handler = async (event, context) => {
   const today = format(new Date(), 'M/DD/YYYY')
   const refreshToken = '1/mii74FRfifcgKeGVbZUYKBzTZw9ZnvJfk7l-aIhyEKY'
 
+  // Setup Google OAuth2
   const oauth2Client = new OAuth2(
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     'https://developers.google.com/oauthplayground'
   )
-
   oauth2Client.setCredentials({
     refresh_token: refreshToken
   })
@@ -38,17 +38,19 @@ exports.handler = async (event, context) => {
   return new Promise((resolve, reject) => {
     axios.get(url)
       .then(res => {
-        const game = res.data[0]['4/28/2019'] // Get today's game if exists
+        // Get today's game if exists
+        const game = res.data[0][today]
+        // Setup email details
         const mailOptions = {
           from: `"Travis Amaral" <travispamaral@gmail.com>`,
           to: 'travispamaral@gmail.com',
           subject: '⚾ Gameday automation - GAME TODAY! ⚾',
           html: `<h4>There is a game today!</h4>
           <p><strong>${game['SUBJECT']} | ${game['START TIME']}</strong></p>
-          <p><a href="https://gameday.netlify.com">https://gameday.netlify.com</p>
-          `
+          <p><a href="https://gameday.netlify.com">https://gameday.netlify.com</p>`
         }
 
+        // If no game return
         if (!game) {
           console.log('no game')
           resolve({
@@ -57,6 +59,7 @@ exports.handler = async (event, context) => {
           })
         }
 
+        // If game send the email!
         transporter.sendMail(mailOptions, function (error, info) {
           if (error) {
             console.log('Error sending email')
