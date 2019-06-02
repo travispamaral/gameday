@@ -40,15 +40,6 @@ exports.handler = async (event, context) => {
       .then(res => {
         // Get today's game if exists
         const game = res.data[0][today]
-        // Setup email details
-        const mailOptions = {
-          from: `"Travis Amaral" <travispamaral@gmail.com>`,
-          to: 'travispamaral@gmail.com',
-          subject: '⚾ Gameday automation - GAME TODAY! ⚾',
-          html: `<h4>There is a game today!</h4>
-          <p><strong>${game['SUBJECT']} | ${game['START TIME']}</strong></p>
-          <p><a href="https://gameday.netlify.com">https://gameday.netlify.com</p>`
-        }
 
         // If no game return
         if (!game) {
@@ -57,22 +48,32 @@ exports.handler = async (event, context) => {
             statusCode: 200,
             body: 'No Game Today'
           })
-        }
-
-        // If game send the email!
-        transporter.sendMail(mailOptions, function (error, info) {
-          if (error) {
-            console.log('Error sending email')
-            resolve({
-              statusCode: 500,
-              body: JSON.stringify(error)
-            })
+        } else {
+          // Setup email details
+          const mailOptions = {
+            from: `"Travis Amaral" <travispamaral@gmail.com>`,
+            to: 'travispamaral@gmail.com',
+            subject: '⚾ Gameday automation - GAME TODAY! ⚾',
+            html: `<h4>There is a game today!</h4>
+            <p><strong>${game['SUBJECT']} | ${game['START TIME']}</strong></p>
+            <p><a href="https://gameday.netlify.com">https://gameday.netlify.com</p>`
           }
-          resolve({
-            statusCode: 200,
-            body: 'Email sent!'
+
+          // If game send the email!
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              console.log('Error sending email')
+              resolve({
+                statusCode: 500,
+                body: JSON.stringify(error)
+              })
+            }
+            resolve({
+              statusCode: 200,
+              body: 'Email sent!'
+            })
           })
-        })
+        }
       })
       .catch(error => {
         console.log(error)
