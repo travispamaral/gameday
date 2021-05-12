@@ -16,7 +16,7 @@
     "googleapis": "^40.0.0",
     "encoding": "^0.1.12",
     "netlify-lambda": "^1.4.7",
-    "nodemailer": "^6.1.1",
+    "nodemailer": "^6.4.16",
     "register-service-worker": "^1.6.2",
     "vue": "^2.6.10"
   },
